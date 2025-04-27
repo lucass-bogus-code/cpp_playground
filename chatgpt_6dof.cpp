@@ -1,12 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <stdexcept> // For std::runtime_error
 
 // Constants
 const double mass = 1.0;       // Mass (kg)
-const double i_x = 0.1;         // Moment of inertia around x-axis (kg.m^2)
-const double i_y = 0.1;         // Moment of inertia around y-axis (kg.m^2)
-const double i_z = 0.2;         // Moment of inertia around z-axis (kg.m^2)
 const double dt = 0.01;         // Time step (s)
 const int steps = 1000;         // Number of simulation steps
 const double gravity = 9.81;    // Gravity (m/s^2)
@@ -28,9 +26,53 @@ struct Moment {
     double x, y, z;
 };
 
+struct Inertia_Tensor
+{
+    double xx, xy, xz;
+    double yx, yy, yz;
+    double zx, zy, zz;
+};
+
+
 State state = {10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 Force force = {0.0, 0.0, 0.0};
 Moment moment = {0.0, 0.0, 0.0};
+Inertia_Tensor inertia = {
+    0.1, 0.0, 0.0,
+    0.0, 0.1, 0.0,
+    0.0, 0.0, 0.2
+};
+
+
+// Invert 3x3 inertia tensor once
+Inertia_Tensor invert_inertia(const Inertia_Tensor& I){
+    // Calculate determinant
+    double det = I.xx * (I.yy * I.zz - I.yz * I.zy)
+               - I.xy * (I.yx * I.zz - I.yz * I.zx)
+               + I.xz * (I.yx * I.zy - I.yy * I.zx);
+
+    if (std::abs(det) < 1e-12) {
+        throw std::runtime_error("Inertia matrix is singular, cannot invert.");
+    }
+
+    Inertia_Tensor inv;
+
+    inv.xx =  (I.yy * I.zz - I.yz * I.zy) / det;
+    inv.xy = -(I.xy * I.zz - I.xz * I.zy) / det;
+    inv.xz =  (I.xy * I.yz - I.xz * I.yy) / det;
+
+    inv.yx = -(I.yx * I.zz - I.yz * I.zx) / det;
+    inv.yy =  (I.xx * I.zz - I.xz * I.zx) / det;
+    inv.yz = -(I.xx * I.yz - I.xy * I.zx) / det;
+
+    inv.zx =  (I.yx * I.zy - I.yy * I.zx) / det;
+    inv.zy = -(I.xx * I.zy - I.xy * I.zx) / det;
+    inv.zz =  (I.xx * I.yy - I.xy * I.yx) / det;
+
+    return inv;
+}
+
+Inertia_Tensor inv_inertia = invert_inertia(inertia);
 
 // External Forces and Moments (time-varying based on user command)
 void compute_forces_and_moments(Force& f, Moment& m, double current_time) {
@@ -64,10 +106,27 @@ State compute_derivatives(const State& state, const Force& f, const Moment& m) {
     dstate.v = f.y / mass + state.p * state.w - state.r * state.u;
     dstate.w = f.z / mass + state.q * state.u - state.p * state.v;
 
-    // Rotational accelerations
-    dstate.p = (m.x + (i_y - i_z) * state.q * state.r) / i_x;
-    dstate.q = (m.y + (i_z - i_x) * state.p * state.r) / i_y;
-    dstate.r = (m.z + (i_x - i_y) * state.p * state.q) / i_z;
+    // Compute Rotational accelerations
+
+    // Compute I * omega
+    double Ix_omega = inertia.xx * state.p + inertia.xy * state.q + inertia.xz * state.r;
+    double Iy_omega = inertia.yx * state.p + inertia.yy * state.q + inertia.yz * state.r;
+    double Iz_omega = inertia.zx * state.p + inertia.zy * state.q + inertia.zz * state.r;
+    
+    // Compute omega x (I * omega)
+    double cross_x = state.q * Iz_omega - state.r * Iy_omega;
+    double cross_y = state.r * Ix_omega - state.p * Iz_omega;
+    double cross_z = state.p * Iy_omega - state.q * Ix_omega;
+    
+    // Compute right-hand side (M - omega x (I*omega))
+    double rhs_x = moment.x - cross_x;
+    double rhs_y = moment.y - cross_y;
+    double rhs_z = moment.z - cross_z;
+    
+    // Multiply Ineverse Inertia Tensor across right-hand side to obtain omega_dot
+    dstate.p = inv_inertia.xx * rhs_x + inv_inertia.xy * rhs_y + inv_inertia.xz * rhs_z;
+    dstate.q = inv_inertia.yx * rhs_x + inv_inertia.yy * rhs_y + inv_inertia.yz * rhs_z;
+    dstate.r = inv_inertia.zx * rhs_x + inv_inertia.zy * rhs_y + inv_inertia.zz * rhs_z;
 
     // Euler angle rates
     dstate.phi = state.p + state.q * sin(state.phi) * tan(state.theta) + state.r * cos(state.phi) * tan(state.theta);
