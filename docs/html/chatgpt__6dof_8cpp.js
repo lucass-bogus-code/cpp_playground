@@ -1,0 +1,26 @@
+var chatgpt__6dof_8cpp =
+[
+    [ "State", "struct_state.html", "struct_state" ],
+    [ "Force", "struct_force.html", "struct_force" ],
+    [ "Moment", "struct_moment.html", "struct_moment" ],
+    [ "Wind", "struct_wind.html", "struct_wind" ],
+    [ "Inertia_Tensor", "struct_inertia___tensor.html", "struct_inertia___tensor" ],
+    [ "Propeller_Speeds", "struct_propeller___speeds.html", "struct_propeller___speeds" ],
+    [ "Aero_Coeff", "struct_aero___coeff.html", "struct_aero___coeff" ],
+    [ "invert_inertia", "chatgpt__6dof_8cpp.html#ab0b78be2544d59b0b7c6bdb71fb49446", null ],
+    [ "cycle_aero", "chatgpt__6dof_8cpp.html#a97723efd296f1af98e5e6d178cbe83bd", null ],
+    [ "compute_forces_and_moments", "chatgpt__6dof_8cpp.html#ab0130b26c427a5bf7c3158d6f62b6007", null ],
+    [ "compute_forces_and_moments2", "chatgpt__6dof_8cpp.html#a4b21a526823d47db27e06c755786658e", null ],
+    [ "compute_derivatives", "chatgpt__6dof_8cpp.html#a0f9add18d79c7463919da219a2bc86ce", null ],
+    [ "rk4_step", "chatgpt__6dof_8cpp.html#ac3d930e0991797c8e97baebeead449cc", null ],
+    [ "main", "chatgpt__6dof_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4", null ],
+    [ "mass", "chatgpt__6dof_8cpp.html#aacd0fcecc290102c8f0892d77e7ceec0", null ],
+    [ "dt", "chatgpt__6dof_8cpp.html#a4d2852f394c94e7eaac02e3c5b393654", null ],
+    [ "steps", "chatgpt__6dof_8cpp.html#ada5c987e854a34d90b0438379925ffad", null ],
+    [ "gravity", "chatgpt__6dof_8cpp.html#a58345891043fbd0722380f4b82bf66d3", null ],
+    [ "state", "chatgpt__6dof_8cpp.html#a876b486d3a5241a126bd5751c5f70f79", null ],
+    [ "force", "chatgpt__6dof_8cpp.html#a58aa6a10f8eaca152e0267c5881f0204", null ],
+    [ "moment", "chatgpt__6dof_8cpp.html#af42128e082e0bc8d8b54a26a086531e7", null ],
+    [ "inertia", "chatgpt__6dof_8cpp.html#a2ee81d4d172f69a6252376f0a02c54d6", null ],
+    [ "inv_inertia", "chatgpt__6dof_8cpp.html#ad38f08c21262c2e1e90248c69c8b6984", null ]
+];
