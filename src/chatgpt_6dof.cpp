@@ -105,7 +105,7 @@ Force cycle_aero(const Propeller_Speeds& p, const State& s, const Wind& w){
     double w_w = s.w + w.z;
 
 
-}
+};
 
 void compute_forces_and_moments(const Propeller_Speeds& p, const State& s, Force& f, Moment& m){
     
