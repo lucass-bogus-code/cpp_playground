@@ -27,7 +27,7 @@ GENERATE_LATEX = NO
 MARKDOWN_SUPPORT = YES
 
 # Show undocumented members in output (for full completeness)
-SHOW_UNDOCUMENTED = YES
+SHOW_UNDOCUMENTED = NO
 
 # Show warnings for undocumented members
 WARN_IF_UNDOCUMENTED = YES

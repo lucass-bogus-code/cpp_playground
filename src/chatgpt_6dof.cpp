@@ -17,8 +17,14 @@ struct State {
     double x, y, z;
 };
 
+/**
+ * @brief Defines forces in body frame
+ * 
+ */
 struct Force {
-    double x, y, z;
+    double x; ///< Force Along Body X-Axis
+    double y; ///< Force along body y-axis
+    double z; ///< Force along body z-axis
 };
 
 struct Moment {
@@ -43,14 +49,17 @@ struct Propeller_Speeds
     double rear_left, rear_right;
 };
 
-
+/**
+ * @brief Struct containing aerodynamic coefficients.
+ * 
+ */
 struct Aero_Coeff
 {
-    double k1; // drag in x-y plane
-    double k2; // x-y cross-coupling
-    double k3; // x-z cross coupling
-    double k4; // y-z cross coupling
-    double k5; // drag in z plane
+    double k1; ///< drag in x-y plane
+    double k2; ///< x-y cross-coupling
+    double k3; ///< x-z cross coupling
+    double k4; ///< y-z cross coupling
+    double k5; ///< drag in z plane
 };
 
 State state = {10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -88,31 +97,35 @@ Inertia_Tensor invert_inertia(const Inertia_Tensor& I){
 
     return inv;
 }
+
 Inertia_Tensor inv_inertia = invert_inertia(inertia);
 
+// aero coefficients in 10^-7 kg rad^-1
+Aero_Coeff aero_coeff = {
+    -10.2506,-0.3177,-0.4322,-7.7050,-7.5530
+};
 
 // Update Force struct with aerodynamic forces. Assume Wind == 0.
-Force cycle_aero(const Propeller_Speeds& p, const State& s, const Wind& w){
+Force cycle_aero(const Propeller_Speeds& prop, const State& state, const Wind& wind, const Aero_Coeff& a){
     // Aerodynamic forces
     Force f;
+    
     // Scalar Sum of All 4 Propeller Speeds
-    double prop4 = p.front_left + p.front_right + p.rear_left + p.rear_right;
-    // Convert u from body to wind frame
-    double u_w = s.u + w.x;
-    // Convert v from body to wind frame
-    double v_w = s.v + w.y;
-    // Convert w from body to wind frame
-    double w_w = s.w + w.z;
+    double prop4 = prop.front_left + prop.front_right + prop.rear_left + prop.rear_right;
+    
+    // Convert from body to wind frame
+    double u = state.u + wind.x;
+    double v = state.v + wind.y;
+    double w = state.w + wind.z;
 
-
+    // Compute Aero Forces
+    f.x = prop4 * (a.k1 * u + a.k2 * v + a.k3 * w);
+    f.y = prop4 * (a.k2 * u + a.k1 * v + a.k3 * w);
+    f.z = prop4 * (a.k4 * u + a.k4 * v + a.k5 * w);
+    return f;
 };
 
 void compute_forces_and_moments(const Propeller_Speeds& p, const State& s, Force& f, Moment& m){
-    
-    // Scalar Sum of All 4 Propeller Speeds
-    double prop4 = p.front_left + p.front_right + p.rear_left + p.rear_right;
-    //cycle_aero()
-
 };
 
 // External Forces and Moments (time-varying based on user command)
